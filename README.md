@@ -1,6 +1,6 @@
 # NLP_final
 
-# simplify APPEND and REPLACE tags
+## simplify APPEND and REPLACE tags
 
 ## test data
 a1_train_incorr_small2.txt 
