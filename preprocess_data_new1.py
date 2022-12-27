@@ -333,68 +333,70 @@ def add_labels_to_the_tokens(source_tokens, labels, delimeters=SEQ_DELIMETERS):
 
 def convert_data_from_raw_files(source_file, target_file, output_file, chunk_size):
     tagged = []
-    source_data, target_data = read_parallel_lines(source_file, target_file)
-    print(f"The size of raw dataset is {len(source_data)}")
+    #source_data, target_data = read_parallel_lines(source_file, target_file)
+    #print(f"The size of raw dataset is {len(source_data)}")
     cnt_total, cnt_all, cnt_tp = 0, 0, 0
     
-    i = 1
-    for source_sent, target_sent in tqdm(zip(source_data, target_data)):
-        try:
-            aligned_sent = align_sequences(source_sent, target_sent)
-        except Exception:
-            aligned_sent = align_sequences(source_sent, target_sent)
-        if source_sent != target_sent:
-            cnt_tp += 1
-        alignments = [aligned_sent]
-        cnt_all += len(alignments)
-        try:
-            check_sent = convert_tagged_line(aligned_sent)
-        except Exception:
-            # debug mode
-            aligned_sent = align_sequences(source_sent, target_sent)
-            check_sent = convert_tagged_line(aligned_sent)
+    with open(source_file, "r") as source_data:
+        with open(target_file, "r") as target_data: 
+            i = 1
+            for source_sent, target_sent in tqdm(zip(source_data, target_data)):
+                try:
+                    aligned_sent = align_sequences(source_sent, target_sent)
+                except Exception:
+                    aligned_sent = align_sequences(source_sent, target_sent)
+                if source_sent != target_sent:
+                    cnt_tp += 1
+                alignments = [aligned_sent]
+                cnt_all += len(alignments)
+                try:
+                    check_sent = convert_tagged_line(aligned_sent)
+                except Exception:
+                    # debug mode
+                    aligned_sent = align_sequences(source_sent, target_sent)
+                    check_sent = convert_tagged_line(aligned_sent)
 
-        if "".join(check_sent.split()) != "".join(
-                target_sent.split()):
-            # do it again for debugging
-            aligned_sent = align_sequences(source_sent, target_sent)
-            check_sent = convert_tagged_line(aligned_sent)
-            print(f"Incorrect pair: \n{target_sent}\n{check_sent}")
-            continue
-        if alignments:
-            cnt_total += len(alignments)
-            tagged.extend(alignments)
+                if "".join(check_sent.split()) != "".join(
+                        target_sent.split()):
+                    # do it again for debugging
+                    aligned_sent = align_sequences(source_sent, target_sent)
+                    check_sent = convert_tagged_line(aligned_sent)
+                    print(f"Incorrect pair: \n{target_sent}\n{check_sent}")
+                    continue
+                if alignments:
+                    cnt_total += len(alignments)
+                    tagged.extend(alignments)
         
-        '''
-        This is where I make changes-----------
-        '''
-        new_tagged = []
-        for tag in tagged:
-            for label in tag.split(' '):
-                a = label.find("$APPEND_")
-                b = label.find("$REPLACE_")
-                if a > -1:
-                    tag = tag.replace(label[a:], "$APPEND")
-                if b > -1: 
-                    tag = tag.replace(label[b:], "$REPLACE")
-            new_tagged.append(tag)
+                '''
+                This is where I make changes-----------
+                '''
+                new_tagged = []
+                for tag in tagged:
+                    for label in tag.split(' '):
+                        a = label.find("$APPEND_")
+                        b = label.find("$REPLACE_")
+                        if a > -1:
+                            tag = tag.replace(label[a:], "$APPEND")
+                        if b > -1: 
+                            tag = tag.replace(label[b:], "$REPLACE")
+                    new_tagged.append(tag)
             
-        tagged = new_tagged
+                tagged = new_tagged
         
-        '''
-        --------------------------------------
-        '''
+                '''
+                --------------------------------------
+                '''
         
-        if len(tagged) > chunk_size:
-            write_lines(output_file, tagged, mode='a')
-            tagged = []
+                if len(tagged) > chunk_size:
+                    write_lines(output_file, tagged, mode='a')
+                    tagged = []
 
-    print(f"Overall extracted {cnt_total}. "
-          f"Original TP {cnt_tp}."
-          f" Original TN {cnt_all - cnt_tp}")
+            print(f"Overall extracted {cnt_total}. "
+                f"Original TP {cnt_tp}."
+                f" Original TN {cnt_all - cnt_tp}")
     
-    if tagged:     
-        write_lines(output_file, tagged, 'a')
+            if tagged:     
+                write_lines(output_file, tagged, 'a')
 
 
 def convert_labels_into_edits(labels):
@@ -495,11 +497,21 @@ def convert_tagged_line(line, delimeters=SEQ_DELIMETERS):
     return target_line
 
 
-def main(args):
-    convert_data_from_raw_files(args.source, args.target, args.output_file, args.chunk_size)
+def main():
+    #convert_data_from_raw_files(args.source, args.target, args.output_file, args.chunk_size)
+    for i in range(886):
+        print( str(i) )
+        file_incorrect_path = "a1_devide/a1_incorrect_" + str(i) + ".txt"
+        file_correct_path = "a1_devide/a1_correct_" + str(i) + ".txt" 
+        if not os.path.exists(file_incorrect_path):
+            continue
+        else:
+            convert_data_from_raw_files( file_incorrect_path  , file_correct_path , "a1_result.txt" , 1000000 )
+
 
 
 if __name__ == '__main__':
+    '''
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--source',
                         help='Path to the source file',
@@ -515,4 +527,5 @@ if __name__ == '__main__':
                         help='Dump each chunk size.',
                         default=1000000)
     args = parser.parse_args()
-    main(args)
+    '''
+    main()
