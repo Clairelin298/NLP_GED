@@ -254,7 +254,7 @@ class GecBERTModel(object):
                     #print("conti")
                     sugg_token = self.vocab.get_token_from_index(idxs[i],
                                                              namespace='labels')
-                    message = message + "(start " + str(i) + " end " + str(i) + " action " + sugg_token + ") "
+                    message = message + "(start " + str(i) + " end " + str(i) + " action " + sugg_token + ") " + token + "||"
                     continue
 
                 sugg_token = self.vocab.get_token_from_index(idxs[i],
@@ -263,9 +263,10 @@ class GecBERTModel(object):
                                                sugg_token)
                 if not action:
                     continue
-                message = message + "(start " + str(startpos) + " end " + str(endpos) + " " + token + " action " + action + ") "
-            
-                print(message)
+                #print(token)
+                message = message + "(start " + str(startpos) + " end " + str(endpos) + " "   + " action " + action +") " + token + "||"
+
+                #print(message)
                 #edits.append((token , action ))
             all_results.append( message )
         return all_results

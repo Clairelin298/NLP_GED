@@ -3,34 +3,70 @@ import argparse
 from utils.helpers import read_lines, normalize
 from gector.gec_model import GecBERTModel
 
-
+def extract( preds ):
+    #tokens = sent.split(" ")
+    new_sents = []
+    for pred in preds :
+        if pred.endswith("||"):
+            pred = pred[:-2]
+        new_sent = ""
+        pred_splite = pred.split("||")
+        for pred_token in pred_splite:
+            #print(pred)    
+            #print(pred_token)
+            pred_token = pred_token.split(" ")
+            #print(pred_token[6])
+            if "$START" in pred_token[6]:
+                continue
+            if(pred_token[5] == "$KEEP)"):
+                #print(tokens)
+                #print(int(pred_token[1]))
+                #print(pred_token[6])
+                new_sent = new_sent + " " + pred_token[6]
+            elif(pred_token[5] == "$DELETE)"):  
+                continue   
+            elif(pred_token[5] == "$REPLACE)"):
+                new_sent = new_sent + " " +'[Mask]'
+            elif(pred_token[5] == "$APPEND)"):
+                new_sent = new_sent + " " + pred_token[6] + " " + '[Mask]'
+            else:
+                new_sent = new_sent + " " +'[Mask]'
+        #print(new_sent)
+        new_sents.append(new_sent)
+        #print(new_sent)
+    return new_sents
+        
 def predict_for_file(input_file, output_file, model, batch_size=32, to_normalize=False):
     test_data = read_lines(input_file)
     predictions = []
     cnt_corrections = 0
     batch = []
+    new_sents = []
     for sent in test_data:
         batch.append(sent.split())
         if len(batch) == batch_size:
             preds = model.handle_batch(batch)
-            predictions.extend(preds)
-            print(preds)
+            batch_new_sents = extract( preds  )
+            #print( new_sent )
+            new_sents.extend( batch_new_sents )
             #cnt_corrections += cnt
             batch = []
     if batch:
         preds = model.handle_batch(batch)
-        print(preds)
-        predictions.extend(preds)
+        batch_new_sent = extract( preds  )
+        #print( new_sent )
+        #predictions.extend(preds)
+        new_sents.extend( batch_new_sents )
         #cnt_corrections += cnt
 
-    result_lines = [" ".join(x) for x in predictions]
+    #result_lines = [" ".join(x) for x in predictions]
     #if to_normalize:
         #result_lines = [ line for line in result_lines]
 #     print('outputdick ', args.output_file)
 #     print('inputdick ', args.input_file)
 #     print('result line ', result_lines)
     with open(output_file, 'w') as f:
-        f.write("\n".join(result_lines) + '\n')
+        f.write("\n".join(new_sents) + '\n')
     #return cnt_corrections
 
 
