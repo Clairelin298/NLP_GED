@@ -53,7 +53,7 @@ def predict_for_file(input_file, output_file, model, batch_size=32, to_normalize
             batch = []
     if batch:
         preds = model.handle_batch(batch)
-        batch_new_sent = extract( preds  )
+        batch_new_sents = extract( preds  )
         #print( new_sent )
         #predictions.extend(preds)
         new_sents.extend( batch_new_sents )
@@ -170,4 +170,5 @@ if __name__ == '__main__':
                         help='Use for text simplification.',
                         action='store_true')
     args = parser.parse_args()
-    main(args)
+    print(args.model_path)
+    #main(args)

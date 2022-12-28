@@ -14,7 +14,7 @@ from overrides import overrides
 from torch.nn.modules.linear import Linear
 
 
-@Model.register("seq2labels")
+@Model.register("GEC-MASKER")
 class Seq2Labels(Model):
     """
     This ``Seq2Labels`` simply encodes a sequence of text with a stacked ``Seq2SeqEncoder``, then

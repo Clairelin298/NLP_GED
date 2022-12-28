@@ -294,8 +294,8 @@ class GecBERTModel(object):
         
         pred_batch = self.postprocess_batch(orig_batch, probabilities,
                                                 idxs, error_probs)
-        if self.log:
-            print(f"Iteration {n_iter + 1}. Predicted {round(100*len(pred_ids)/batch_size, 1)}% of sentences.")
+        #if self.log:
+            #print(f"Iteration {n_iter + 1}. Predicted {round(100*len(pred_ids)/batch_size, 1)}% of sentences.")
 
         #final_batch, pred_ids, cnt = \
             #self.update_final_batch(final_batch, pred_ids, pred_batch,
